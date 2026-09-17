@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClientFlow — Freelancer & Agency Client Portal OS</title>
+
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f3ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              300: '#a5b4fc',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+              950: '#1e1b4b',
+            },
+            accent: {
+              50: '#f0fdf4',
+              500: '#22c55e',
+              600: '#16a34a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Flatpickr CSS & JS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+  <!-- jsPDF CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    /* Custom Scrollbars & Animations */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(51, 65, 85, 0.8);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(99, 102, 241, 0.8);
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-nav {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .gradient-portal-text {
+      background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 50%, #818cf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .glow-effect {
+      box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.3);
+    }
+  </style>
+</head>
+<body class="h-full bg-slate-950 font-sans text-slate-100 selection:bg-brand-500 selection:text-white flex flex-col antialiased overflow-x-hidden">
+
+  <!-- Application Toast Notifications Container -->
+  <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 pointer-events-none max-w-sm w-full"></div>
+
+  <!-- Top Navigation Header -->
+  <header class="glass-nav sticky top-0 z-40 h-16 flex items-center justify-between px-4 lg:px-8">
+    <div class="flex items-center gap-4">
+      <!-- Mobile Sidebar Toggle -->
+      <button id="mobile-menu-btn" class="lg:hidden text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+      </button>
+
+      <!-- Brand Logo -->
+      <a href="#" onclick="navigateTo('dashboard')" class="flex items-center gap-3 group">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-sky-400 flex items-center justify-center shadow-lg shadow-brand-500/25 group-hover:scale-105 transition-transform duration-200">
+          <i data-lucide="layers" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <span class="text-lg font-bold tracking-tight text-white flex items-center gap-1.5">
+            ClientFlow
+            <span id="role-badge" class="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30">Workspace</span>
+          </span>
+          <span class="text-[10px] text-slate-400 block -mt-1 font-mono">Client Operating System</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Center Search Bar -->
+    <div class="hidden md:flex items-center flex-1 max-w-md mx-8">
+      <div class="relative w-full">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        <input
+          type="text"
+          id="global-search"
+          placeholder="Search projects, clients, invoices, proposals..."
+          class="w-full bg-slate-900/90 border border-slate-800 rounded-xl pl-10 pr-12 py-1.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition shadow-inner"
+        />
+        <kbd class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-500 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700">⌘K</kbd>
+      </div>
+    </div>
+
+    <!-- Right Header Controls & Role Switcher -->
+    <div class="flex items-center gap-3">
+      <!-- Frontend Role Switcher Simulation -->
+      <div class="bg-slate-900 border border-slate-800 p-1 rounded-xl flex items-center text-xs font-medium">
+        <button id="role-workspace-btn" onclick="switchRole('workspace')" class="px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition bg-brand-600 text-white shadow-sm">
+          <i data-lucide="briefcase" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Workspace</span>
+        </button>
+        <button id="role-portal-btn" onclick="switchRole('portal')" class="px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition text-slate-400 hover:text-white">
+          <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Client Portal</span>
+        </button>
+      </div>
+
+      <!-- Quick Action Button (Workspace view only) -->
+      <div id="quick-action-container">
+        <button onclick="openModal('quick-create-modal')" class="hidden sm:flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-xl text-xs font-semibold transition">
+          <i data-lucide="plus" class="w-4 h-4 text-brand-400"></i>
+          <span>Create</span>
+        </button>
+      </div>
+
+      <!-- Notification Bell -->
+      <div class="relative">
+        <button onclick="toggleNotifications()" class="relative p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition">
+          <i data-lucide="bell" class="w-5 h-5"></i>
+          <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-500 ring-4 ring-slate-950"></span>
+        </button>
+        <!-- Notification Dropdown -->
+        <div id="notifications-dropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 glass-card rounded-2xl shadow-2xl p-4 z-50 border border-slate-800">
+          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+            <h4 class="text-sm font-semibold text-white">Notifications</h4>
+            <span class="text-xs text-brand-400 hover:underline cursor-pointer" onclick="markAllNotificationsRead()">Mark all read</span>
+          </div>
+          <div id="notifications-list" class="space-y-2 max-h-72 overflow-y-auto pr-1"></div>
+        </div>
+      </div>
+
+      <!-- User / Client Avatar Profile -->
+      <div class="flex items-center gap-2.5 pl-2 border-l border-slate-800">
+        <img id="user-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="w-8 h-8 rounded-full ring-2 ring-brand-500/40 object-cover" />
+        <div class="hidden xl:block text-left">
+          <div id="user-name" class="text-xs font-semibold text-white">Alex Rivera</div>
+          <div id="user-role" class="text-[10px] text-slate-400">Studio Principal</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Body Wrapper -->
+  <div class="flex-1 flex overflow-hidden">
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="w-64 glass-card border-r border-slate-800/80 flex flex-col justify-between hidden lg:flex shrink-0 transition-all duration-300">
+      <div class="p-4 space-y-6">
+
+        <!-- Active Workspace Context / Role Info -->
+        <div id="sidebar-context-card" class="bg-gradient-to-r from-slate-900 to-slate-900/60 p-3.5 rounded-2xl border border-slate-800 flex items-center gap-3">
+          <div id="context-icon-bg" class="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 shrink-0">
+            <i id="context-icon" data-lucide="building-2" class="w-5 h-5"></i>
+          </div>
+          <div class="overflow-hidden">
+            <h3 id="context-title" class="text-xs font-bold text-white truncate">Nexus Creative Agency</h3>
+            <p id="context-subtitle" class="text-[11px] text-slate-400 truncate">12 Active Clients</p>
+          </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="space-y-1" id="main-nav-links">
+          <!-- Dynamically populated based on role -->
+        </nav>
+      </div>
+
+      <!-- Bottom Workspace Footer Stats -->
+      <div class="p-4 border-t border-slate-800/80 space-y-3">
+        <div id="sidebar-bottom-widget" class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 text-xs">
+          <div class="flex justify-between items-center text-slate-400 mb-1.5">
+            <span>Client Satisfaction</span>
+            <span class="font-bold text-emerald-400">98%</span>
+          </div>
+          <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+            <div class="bg-emerald-500 h-1.5 rounded-full" style="width: 98%"></div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-xs text-slate-500 px-1">
+          <span>v2.4 Pro OS</span>
+          <span class="flex items-center gap-1 text-emerald-400"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Live System</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-8" id="main-content">
+      <!-- Dynamic views loaded here -->
+    </main>
+
+  </div>
+
+  <!-- Reusable Modals Placeholder Container -->
+  <div id="modal-container"></div>
+
+  <!-- JavaScript Modules -->
+  <script src="js/mockData.js"></script>
+  <script src="js/services.js"></script>
+  <script src="js/workspaceViews.js"></script>
+  <script src="js/portalViews.js"></script>
+  <script src="js/proposalInvoiceViews.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
